@@ -41,6 +41,5 @@ public class CommunicationEntry extends WebSocketAdapter
     public void onWebSocketText(String message)
     {
         LOGGER.info(String.format("Received TEXT message: %s", message));
-        System.out.println(message);
     }
 }

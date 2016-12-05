@@ -17,7 +17,7 @@ public class VrgDesktop extends Application
         try
         {
             CommunicationManager communicationManager = new CommunicationManager();
-            communicationManager.start(10230);
+            communicationManager.start();
         }
         catch (Exception e)
         {
