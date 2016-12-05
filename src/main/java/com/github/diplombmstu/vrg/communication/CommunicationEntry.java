@@ -1,5 +1,6 @@
 package com.github.diplombmstu.vrg.communication;
 
+import com.github.diplombmstu.vrg.common.ExceptionHelper;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 
@@ -19,23 +20,27 @@ public class CommunicationEntry extends WebSocketAdapter
     @OnClose
     public void onWebSocketClose(int statusCode, String reason)
     {
+        LOGGER.info(String.format("Socket Closed: %s", reason));
         super.onWebSocketClose(statusCode, reason);
     }
 
     @OnOpen
     public void onWebSocketConnect(Session session)
     {
+        LOGGER.info(String.format("Socket Connected: %s", session));
         super.onWebSocketConnect(session);
     }
 
     @OnError
     public void onWebSocketError(Throwable cause)
     {
+        LOGGER.severe(String.format("Web socket error. %s", ExceptionHelper.buildStackTrace(cause)));
     }
 
     @OnMessage
     public void onWebSocketText(String message)
     {
+        LOGGER.info(String.format("Received TEXT message: %s", message));
         System.out.println(message);
     }
 }
