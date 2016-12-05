@@ -1,25 +1,20 @@
 package com.github.diplombmstu.vrg.communication.events;
 
+import javax.websocket.CloseReason;
+
 /**
  * TODO add comment
  */
 public class WebSocketCloseEvent
 {
-    private int statusCode;
-    private String reason;
+    private CloseReason reason;
 
-    public WebSocketCloseEvent(int statusCode, String reason)
+    public WebSocketCloseEvent(CloseReason reason)
     {
-        this.statusCode = statusCode;
         this.reason = reason;
     }
 
-    public int getStatusCode()
-    {
-        return statusCode;
-    }
-
-    public String getReason()
+    public CloseReason getReason()
     {
         return reason;
     }

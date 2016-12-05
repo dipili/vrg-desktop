@@ -1,6 +1,6 @@
 package com.github.diplombmstu.vrg.communication.events;
 
-import org.eclipse.jetty.websocket.api.Session;
+import javax.websocket.Session;
 
 /**
  * TODO add comment

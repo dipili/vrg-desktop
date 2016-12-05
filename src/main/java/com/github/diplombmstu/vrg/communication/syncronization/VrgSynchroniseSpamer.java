@@ -9,7 +9,7 @@ import java.util.TimerTask;
 /**
  * TODO add comment
  */
-public class VegSynchroniseSpamer
+public class VrgSynchroniseSpamer
 {
     private static final int SPAM_PERIOD = 500;
     private DatagramSocket socket;

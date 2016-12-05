@@ -1,35 +1,17 @@
 package com.github.diplombmstu.vrg.communication;
 
 import com.github.diplombmstu.vrg.common.ExceptionHelper;
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
+import javax.websocket.*;
 import java.util.logging.Logger;
 
 /**
  * TODO add comment
  */
-public class CommunicationEntry extends WebSocketAdapter
+public class CommunicationEntry extends PerfectWebSocketAdapter
 {
     private static final Logger LOGGER = Logger.getLogger(CommunicationEntry.class.getName());
-
-    @OnClose
-    public void onWebSocketClose(int statusCode, String reason)
-    {
-        LOGGER.info(String.format("Socket Closed: %s", reason));
-        super.onWebSocketClose(statusCode, reason);
-    }
-
-    @OnOpen
-    public void onWebSocketConnect(Session session)
-    {
-        LOGGER.info(String.format("Socket Connected: %s", session));
-        super.onWebSocketConnect(session);
-    }
+    private Session session;
 
     @OnError
     public void onWebSocketError(Throwable cause)
@@ -41,5 +23,20 @@ public class CommunicationEntry extends WebSocketAdapter
     public void onWebSocketText(String message)
     {
         LOGGER.info(String.format("Received TEXT message: %s", message));
+    }
+
+    @OnOpen
+    public void onWebSocketConnect(Session session)
+    {
+        LOGGER.info(String.format("Socket Connected: %s", session));
+        this.session = session;
+    }
+
+    @OnClose
+    @Override
+    public void onWebSocketClose(CloseReason reason)
+    {
+        LOGGER.info(String.format("Socket Closed: %s", reason));
+        session = null;
     }
 }

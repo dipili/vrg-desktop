@@ -6,7 +6,6 @@ import com.github.diplombmstu.vrg.communication.events.WebSocketErrorEvent;
 import com.github.diplombmstu.vrg.communication.events.WebSocketTextEvent;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 
 /**
  * TODO add comment
@@ -14,9 +13,9 @@ import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 public class WebsocketEventRouter
 {
     private final EventBus eventBus;
-    private final WebSocketAdapter webSocketAdapter;
+    private final PerfectWebSocketAdapter webSocketAdapter;
 
-    WebsocketEventRouter(EventBus eventBus, WebSocketAdapter webSocketAdapter)
+    WebsocketEventRouter(EventBus eventBus, PerfectWebSocketAdapter webSocketAdapter)
     {
         this.eventBus = eventBus;
         this.webSocketAdapter = webSocketAdapter;
@@ -53,6 +52,6 @@ public class WebsocketEventRouter
     @Subscribe
     public void onWebSocketClose(WebSocketCloseEvent event)
     {
-        webSocketAdapter.onWebSocketClose(event.getStatusCode(), event.getReason());
+        webSocketAdapter.onWebSocketClose(event.getReason());
     }
 }

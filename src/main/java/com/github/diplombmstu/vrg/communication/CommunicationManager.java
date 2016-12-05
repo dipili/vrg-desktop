@@ -1,7 +1,7 @@
 package com.github.diplombmstu.vrg.communication;
 
 import com.github.diplombmstu.vrg.common.VrgCommons;
-import com.github.diplombmstu.vrg.communication.syncronization.VegSynchroniseSpamer;
+import com.github.diplombmstu.vrg.communication.syncronization.VrgSynchroniseSpamer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -19,7 +19,7 @@ public class CommunicationManager
 {
     private static final Logger LOGGER = Logger.getLogger(CommunicationManager.class.getName());
     private Server server;
-    private VegSynchroniseSpamer synchroniseSpamer;
+    private VrgSynchroniseSpamer synchroniseSpamer;
 
     public void start() throws Exception
     {
@@ -32,7 +32,7 @@ public class CommunicationManager
         WebsocketEventRouter router = new WebsocketEventRouter(ServletCommunicationEndpoint.EVENT_BUS, entry);
         router.start();
 
-        synchroniseSpamer = new VegSynchroniseSpamer();
+        synchroniseSpamer = new VrgSynchroniseSpamer();
         synchroniseSpamer.start(VrgCommons.SYNC_PORT);
 
         LOGGER.warning("Starting communication server.");
