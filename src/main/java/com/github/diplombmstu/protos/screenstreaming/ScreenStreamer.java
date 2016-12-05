@@ -1,4 +1,4 @@
-package com.github.diplombmstu.vrg.screenstreaming;
+package com.github.diplombmstu.protos.screenstreaming;
 
 import org.jitsi.service.libjitsi.LibJitsi;
 import org.jitsi.service.neomedia.*;

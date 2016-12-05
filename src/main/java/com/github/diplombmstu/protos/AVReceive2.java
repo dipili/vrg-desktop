@@ -1,4 +1,4 @@
-package com.github.diplombmstu.vrg;
+package com.github.diplombmstu.protos;
 
 import org.jitsi.service.libjitsi.LibJitsi;
 import org.jitsi.service.neomedia.*;

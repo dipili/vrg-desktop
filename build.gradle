@@ -17,6 +17,11 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
+
+    compile 'com.google.guava:guava:20.0'
+    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-server', version: '9.3.14.v20161028'
+    compile group: 'org.eclipse.jetty.websocket', name: 'javax-websocket-server-impl', version: '9.3.14.v20161028'
+
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.2.2'
     compile group: 'org.jitsi', name: 'jitsi-libjitsi', version: '2.9-SNAPSHOT'
     compile fileTree(dir: 'lib', include: '*.jar')
