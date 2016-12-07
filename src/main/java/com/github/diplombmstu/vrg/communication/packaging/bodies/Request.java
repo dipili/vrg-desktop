@@ -5,7 +5,7 @@ import java.util.UUID;
 /**
  * TODO add comment
  */
-abstract public class Request<T>
+abstract public class Request
 {
     private UUID uuid;
 
