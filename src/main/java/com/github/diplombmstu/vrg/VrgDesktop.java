@@ -31,7 +31,7 @@ public class VrgDesktop extends Application
         Button button = new Button();
         button.setOnMouseClicked(event ->
                                  {
-
+                                    // // TODO: 14.12.16 impl
                                  });
 
         root.getChildren().add(button);

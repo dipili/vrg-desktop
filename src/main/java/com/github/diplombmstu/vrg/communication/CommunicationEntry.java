@@ -13,6 +13,11 @@ public class CommunicationEntry extends PerfectWebSocketAdapter
     private static final Logger LOGGER = Logger.getLogger(CommunicationEntry.class.getName());
     private Session session;
 
+    public Session getSessionInstance()
+    {
+        return session;
+    }
+
     @OnError
     public void onWebSocketError(Throwable cause)
     {

@@ -1,19 +1,21 @@
 package com.github.diplombmstu.vrg.communication.packaging;
 
+import com.github.diplombmstu.vrg.communication.packaging.bodies.PacketBody;
+
 /**
  * TODO add comment
  */
 public class Packet
 {
     private PacketHeader header;
-    private Object body;
+    private PacketBody body;
 
-    public Object getBody()
+    public PacketBody getBody()
     {
         return body;
     }
 
-    public void setBody(Object body)
+    public void setBody(PacketBody body)
     {
         this.body = body;
     }

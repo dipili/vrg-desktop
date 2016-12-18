@@ -1,0 +1,24 @@
+package com.github.diplombmstu.vrg.communication.senders;
+
+import com.github.diplombmstu.vrg.communication.packaging.bodies.Command;
+import com.google.gson.Gson;
+
+import javax.websocket.Session;
+import java.io.IOException;
+
+/**
+ * TODO add comment
+ */
+public class CommandSender extends Sender
+{
+    public CommandSender(Session session)
+    {
+        super(session);
+    }
+
+    public void send(Command<?> command) throws IOException
+    {
+        String jsonString = new Gson().toJson(command);
+        getSession().getBasicRemote().sendText(jsonString);
+    }
+}
