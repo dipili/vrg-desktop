@@ -27,6 +27,11 @@ public class CommunicationManager
     private VrgSynchroniseSpamer synchroniseSpamer;
     private CommandSender commandSender;
 
+    public CommandSender getCommandSender()
+    {
+        return commandSender;
+    }
+
     public void start() throws Exception
     {
         this.server = createCommunicationServer(VrgCommons.COMMUNICATION_SERVER_PORT);
@@ -59,28 +64,11 @@ public class CommunicationManager
         {
             e.printStackTrace(); // TODO handle
         }
-
-//        synchroniseSpamer.stop(); // TODO remove or uncomment
     }
-
-    // TODO remove or ucomment
-//    @Subscribe
-//    public void onClientDisconnect(WebSocketCloseEvent event)
-//    {
-//        try
-//        {
-//            synchroniseSpamer.start(VrgCommons.SYNC_PORT);
-//        }
-//        catch (UnknownHostException | SocketException e)
-//        {
-//            e.printStackTrace(); // TODO remove or uncomment
-//        }
-//    }
 
     public void stop() throws Exception
     {
         LOGGER.warning("Stopping communication server.");
-//        ServletCommunicationEndpoint.EVENT_BUS.unregister(this);
         synchroniseSpamer.stop();
         server.stop();
         server.destroy();
