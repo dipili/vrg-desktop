@@ -34,7 +34,7 @@ public class VrgDesktop extends Application
         }
 
         VBox root = new VBox();
-        Button button = new Button();
+        Button button = new Button("Load image");
         button.setOnMouseClicked(event ->
                                  {
                                      FileChooser fileChooser = new FileChooser();
