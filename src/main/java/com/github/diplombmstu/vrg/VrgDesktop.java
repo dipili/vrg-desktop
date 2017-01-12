@@ -46,7 +46,8 @@ public class VrgDesktop extends Application
 
                                      try
                                      {
-                                         communicationManager.getCommandSender().send(new SetImageCommand(file.getAbsolutePath()));
+                                         communicationManager.getCommandSender()
+                                                 .send(new SetImageCommand(file.getAbsolutePath()));
                                      }
                                      catch (IOException e)
                                      {
