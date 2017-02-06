@@ -15,14 +15,6 @@
 
 package com.github.diplombmstu.vrg.streaming;
 
-import android.graphics.ImageFormat;
-import android.graphics.Rect;
-import android.graphics.YuvImage;
-import android.hardware.Camera;
-import android.os.*;
-import android.util.Log;
-import android.view.SurfaceHolder;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -36,7 +28,7 @@ final class CameraStreamer extends Object
     private static final long OPEN_CAMERA_POLL_INTERVAL_MS = 1000L;
 
     private final Object mLock = new Object();
-    private final MovingAverage mAverageSpf = new MovingAverage(50 /* numValues */);
+    private final MovingAverage mAverageSpf = new MovingAverage(50);
 
     private final int mCameraIndex;
     private final boolean mUseFlashLight;
@@ -124,13 +116,13 @@ final class CameraStreamer extends Object
             if (!mRunning)
             {
                 throw new IllegalStateException("CameraStreamer is already stopped");
-            } // if
+            }
 
             mRunning = false;
             if (mMJpegHttpStreamer != null)
             {
                 mMJpegHttpStreamer.stop();
-            } // if
+            }
             if (mCamera != null)
             {
                 mCamera.release();
