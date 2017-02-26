@@ -18,7 +18,7 @@ public class CommandSender extends Sender
         super(session);
     }
 
-    public void send(Command<?> command) throws IOException
+    public void send(Command command) throws IOException
     {
         CommandHeader commandHeader = new CommandHeader(command.getCode());
         String jsonString = new Gson().toJson(commandHeader);

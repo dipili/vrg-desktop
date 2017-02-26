@@ -35,10 +35,10 @@ final class MovingAverage
         mSum -= mValues[mEnd];
         mValues[mEnd] = value;
         mEnd = (mEnd + 1) % mNumValues;
+
         if (mLength < mNumValues)
-        {
             mLength++;
-        } // if
+
         mSum += value;
     }
 

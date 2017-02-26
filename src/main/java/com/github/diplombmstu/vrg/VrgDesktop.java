@@ -1,7 +1,7 @@
 package com.github.diplombmstu.vrg;
 
-import com.github.diplombmstu.vrg.communication.CommunicationManager;
 import com.github.diplombmstu.vrg.communication.packaging.bodies.SetImageCommand;
+import com.github.diplombmstu.vrg.streaming.CameraStreamer;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -22,37 +22,40 @@ public class VrgDesktop extends Application
     @Override
     public void start(Stage primaryStage)
     {
-        CommunicationManager communicationManager = new CommunicationManager();
+        CameraStreamer cameraStreamer = new CameraStreamer(8080, 0, 40);
+        cameraStreamer.start();
 
-        try
-        {
-            communicationManager.start();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+//        CommunicationManager communicationManager = new CommunicationManager();
+//
+//        try
+//        {
+//            communicationManager.start();
+//        }
+//        catch (Exception e)
+//        {
+//            e.printStackTrace();
+//        }
 
         VBox root = new VBox();
         Button button = new Button("Load image");
         button.setOnMouseClicked(event ->
                                  {
-                                     FileChooser fileChooser = new FileChooser();
-                                     fileChooser.setTitle("Send image");
-                                     File file = fileChooser.showOpenDialog(primaryStage);
-
-                                     if (!file.exists())
-                                         return;
-
-                                     try
-                                     {
-                                         communicationManager.getCommandSender()
-                                                 .send(new SetImageCommand(file.getAbsolutePath()));
-                                     }
-                                     catch (IOException e)
-                                     {
-                                         e.printStackTrace(); // TODO handle
-                                     }
+//                                     FileChooser fileChooser = new FileChooser();
+//                                     fileChooser.setTitle("Send image");
+//                                     File file = fileChooser.showOpenDialog(primaryStage);
+//
+//                                     if (!file.exists())
+//                                         return;
+//
+//                                     try
+//                                     {
+//                                         communicationManager.getCommandSender()
+//                                                 .send(new SetImageCommand(file.getAbsolutePath()));
+//                                     }
+//                                     catch (IOException e)
+//                                     {
+//                                         e.printStackTrace(); // TODO handle
+//                                     }
                                  });
 
         root.getChildren().add(button);

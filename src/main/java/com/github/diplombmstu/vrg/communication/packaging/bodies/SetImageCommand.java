@@ -40,4 +40,10 @@ public class SetImageCommand implements Command
     {
         return imageBytes;
     }
+
+    @Override
+    public boolean isBinary()
+    {
+        return false;
+    }
 }

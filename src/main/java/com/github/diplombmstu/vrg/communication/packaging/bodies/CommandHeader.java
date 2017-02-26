@@ -3,7 +3,7 @@ package com.github.diplombmstu.vrg.communication.packaging.bodies;
 /**
  * TODO add comment
  */
-public class CommandHeader implements Command<Object>
+public class CommandHeader implements Command
 {
     private int code;
 
@@ -22,5 +22,11 @@ public class CommandHeader implements Command<Object>
     public Object getBody()
     {
         return null;
+    }
+
+    @Override
+    public boolean isBinary()
+    {
+        return false;
     }
 }
