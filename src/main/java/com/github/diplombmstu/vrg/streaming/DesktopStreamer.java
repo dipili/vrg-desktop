@@ -1,6 +1,8 @@
 package com.github.diplombmstu.vrg.streaming;
 
+import org.jitsi.impl.neomedia.device.ScreenDeviceImpl;
 import org.jitsi.impl.neomedia.imgstreaming.DesktopInteractImpl;
+import org.jitsi.service.neomedia.device.ScreenDevice;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -17,27 +19,19 @@ public class DesktopStreamer
     private final Object mLock = new Object();
     private final MovingAverage mAverageSpf = new MovingAverage(50);
     private final int mPort;
-    private final int mPreviewSizeIndex;
-    private final int mJpegQuality;
     private boolean mRunning = false;
-    private int mPreviewFormat = Integer.MIN_VALUE;
-    private int mPreviewWidth = Integer.MIN_VALUE;
-    private int mPreviewHeight = Integer.MIN_VALUE;
-    private int mPreviewBufferSize = Integer.MIN_VALUE;
     private MemoryOutputStream mJpegOutputStream = null;
     private MJpegHttpStreamer mMJpegHttpStreamer = null;
     private long mNumFrames = 0L;
     private long mLastTimestamp = Long.MIN_VALUE;
 
-    public DesktopStreamer(final int port, final int previewSizeIndex, final int jpegQuality) throws AWTException
+    public DesktopStreamer(final int port) throws AWTException
     {
         super();
 
         desktopInteract = new DesktopInteractImpl();
 
         mPort = port;
-        mPreviewSizeIndex = previewSizeIndex;
-        mJpegQuality = jpegQuality;
     }
 
     public void start()
@@ -58,18 +52,7 @@ public class DesktopStreamer
                                        //noinspection InfiniteLoopStatement
                                        while (true)
                                        {
-                                           try
-                                           {
-                                               ImageIO.write(desktopInteract.captureScreen(),
-                                                             "jpeg",
-                                                             mJpegOutputStream);
-                                           }
-                                           catch (IOException e)
-                                           {
-                                               e.printStackTrace(); // TODO
-                                           }
-
-                                           sendPreviewFrame(new Date().getTime());
+                                           sendNextFrame(new Date().getTime());
                                        }
                                    });
         thread.setDaemon(true);
@@ -127,16 +110,18 @@ public class DesktopStreamer
 
     private void startStreamingIfRunning() throws IOException
     {
-        // Set up preview callback
-        mPreviewWidth = 100; // TODO
-        mPreviewHeight = 100;
-        final int BITS_PER_BYTE = 8;
-        final int bytesPerPixel = 100 / BITS_PER_BYTE;
+        ScreenDevice screenDevice = ScreenDeviceImpl.getDefaultScreenDevice();
+
+        int mPreviewWidth = screenDevice.getSize().width;
+        int mPreviewHeight = screenDevice.getSize().height;
+        final int bitsPerByte = 8;
+        final double bytesPerPixel = 1.38 * bitsPerByte; // TODO magic num
+
         // XXX: According to the documentation the buffer size can be
         // calculated by width * height * bytesPerPixel. However, this
         // returned an error saying it was too small. It always needed
         // to be exactly 1.5 times larger.
-        mPreviewBufferSize = mPreviewWidth * mPreviewHeight * bytesPerPixel * 3 / 2 + 1;
+        int mPreviewBufferSize = (int) (mPreviewWidth * mPreviewHeight * bytesPerPixel * 1.5 + 1);
 
         // We assumed that the compressed image will be no bigger than
         // the uncompressed image.
@@ -157,9 +142,20 @@ public class DesktopStreamer
         }
     }
 
-    private void sendPreviewFrame(final long timestamp)
+    private void sendNextFrame(final long timestamp)
     {
-        // Calcalute the timestamp
+        try
+        {
+            ImageIO.write(desktopInteract.captureScreen(),
+                          "jpeg",
+                          mJpegOutputStream);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace(); // TODO
+        }
+
+        // Calculate the timestamp
         final long MILLI_PER_SECOND = 1000L;
         final long timestampSeconds = timestamp / MILLI_PER_SECOND;
 
@@ -177,14 +173,8 @@ public class DesktopStreamer
 
         mLastTimestamp = timestampSeconds;
 
-//        // Create JPEG
-//        BufferedImage image = new BufferedImage(mPreviewFormat, mPreviewWidth, BufferedImage.TYPE_INT_ARGB);
-//        final YuvImage image = new YuvImage(data, mPreviewFormat, mPreviewWidth, mPreviewHeight, null);
-//        image.compressToJpeg(mPreviewRect, mJpegQuality, mJpegOutputStream);
-
         mMJpegHttpStreamer.streamJpeg(mJpegOutputStream.getBuffer(), mJpegOutputStream.getLength(), timestamp);
 
-        // Clean up
         mJpegOutputStream.seek(0);
     }
 }

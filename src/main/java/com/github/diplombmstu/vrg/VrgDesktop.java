@@ -21,7 +21,7 @@ public class VrgDesktop extends Application
     {
         try
         {
-            DesktopStreamer desktopStreamer = new DesktopStreamer(8080, 0, 40);
+            DesktopStreamer desktopStreamer = new DesktopStreamer(8080);
             desktopStreamer.start();
         }
         catch (AWTException e)
