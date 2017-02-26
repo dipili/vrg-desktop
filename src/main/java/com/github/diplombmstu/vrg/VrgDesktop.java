@@ -1,5 +1,6 @@
 package com.github.diplombmstu.vrg;
 
+import com.github.diplombmstu.vrg.common.ExceptionUtils;
 import com.github.diplombmstu.vrg.streaming.DesktopStreamer;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -8,9 +9,14 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.awt.*;
+import java.io.IOException;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 public class VrgDesktop extends Application
 {
+    private static final Logger LOGGER = Logger.getLogger(VrgDesktop.class.getName());
+
     public static void main(String[] args)
     {
         launch(args);
@@ -19,6 +25,15 @@ public class VrgDesktop extends Application
     @Override
     public void start(Stage primaryStage)
     {
+        try
+        {
+            LogManager.getLogManager().readConfiguration(VrgDesktop.class.getResourceAsStream("/logging.properties"));
+        }
+        catch (IOException e)
+        {
+            LOGGER.severe(String.format("Could not setup logger configuration: %s", ExceptionUtils.buildStackTrace(e)));
+        }
+
         try
         {
             DesktopStreamer desktopStreamer = new DesktopStreamer(8080);
