@@ -1,55 +1,39 @@
-/* Copyright 2013 Foxdog Studios Ltd
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.github.diplombmstu.vrg.streaming;
 
+import org.jitsi.impl.neomedia.imgstreaming.DesktopInteractImpl;
+
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
+import java.awt.*;
 import java.io.IOException;
 import java.util.Date;
 import java.util.logging.Logger;
 
-public class CameraStreamer extends Object
+public class DesktopStreamer
 {
-    private static final Logger LOGGER = Logger.getLogger(CameraStreamer.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DesktopStreamer.class.getName());
 
     private static final long OPEN_CAMERA_POLL_INTERVAL_MS = 1000L;
-
+    private static DesktopInteractImpl desktopInteract;
     private final Object mLock = new Object();
     private final MovingAverage mAverageSpf = new MovingAverage(50);
-
     private final int mPort;
     private final int mPreviewSizeIndex;
     private final int mJpegQuality;
-
     private boolean mRunning = false;
-
     private int mPreviewFormat = Integer.MIN_VALUE;
     private int mPreviewWidth = Integer.MIN_VALUE;
     private int mPreviewHeight = Integer.MIN_VALUE;
-
     private int mPreviewBufferSize = Integer.MIN_VALUE;
     private MemoryOutputStream mJpegOutputStream = null;
     private MJpegHttpStreamer mMJpegHttpStreamer = null;
     private long mNumFrames = 0L;
     private long mLastTimestamp = Long.MIN_VALUE;
 
-    public CameraStreamer(final int port, final int previewSizeIndex, final int jpegQuality)
+    public DesktopStreamer(final int port, final int previewSizeIndex, final int jpegQuality) throws AWTException
     {
         super();
+
+        desktopInteract = new DesktopInteractImpl();
 
         mPort = port;
         mPreviewSizeIndex = previewSizeIndex;
@@ -62,7 +46,7 @@ public class CameraStreamer extends Object
         {
             if (mRunning)
             {
-                throw new IllegalStateException("CameraStreamer is already running");
+                throw new IllegalStateException("DesktopStreamer is already running");
             }
             mRunning = true;
         }
@@ -74,15 +58,15 @@ public class CameraStreamer extends Object
                                        //noinspection InfiniteLoopStatement
                                        while (true)
                                        {
-                                           BufferedImage img = null;
                                            try
                                            {
-                                               img = ImageIO.read(new File(
-                                                       "C:/Users/kuzia/OneDrive/Изображения/wall/187472.jpg"));
-                                               ImageIO.write(img, "jpeg", mJpegOutputStream);
+                                               ImageIO.write(desktopInteract.captureScreen(),
+                                                             "jpeg",
+                                                             mJpegOutputStream);
                                            }
-                                           catch (IOException ignored)
+                                           catch (IOException e)
                                            {
+                                               e.printStackTrace(); // TODO
                                            }
 
                                            sendPreviewFrame(new Date().getTime());
@@ -103,7 +87,7 @@ public class CameraStreamer extends Object
         {
             if (!mRunning)
             {
-                throw new IllegalStateException("CameraStreamer is already stopped");
+                throw new IllegalStateException("DesktopStreamer is already stopped");
             }
 
             mRunning = false;

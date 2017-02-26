@@ -1,16 +1,13 @@
 package com.github.diplombmstu.vrg;
 
-import com.github.diplombmstu.vrg.communication.packaging.bodies.SetImageCommand;
-import com.github.diplombmstu.vrg.streaming.CameraStreamer;
+import com.github.diplombmstu.vrg.streaming.DesktopStreamer;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.io.IOException;
+import java.awt.*;
 
 public class VrgDesktop extends Application
 {
@@ -22,8 +19,15 @@ public class VrgDesktop extends Application
     @Override
     public void start(Stage primaryStage)
     {
-        CameraStreamer cameraStreamer = new CameraStreamer(8080, 0, 40);
-        cameraStreamer.start();
+        try
+        {
+            DesktopStreamer desktopStreamer = new DesktopStreamer(8080, 0, 40);
+            desktopStreamer.start();
+        }
+        catch (AWTException e)
+        {
+            e.printStackTrace(); // TODO
+        }
 
 //        CommunicationManager communicationManager = new CommunicationManager();
 //
