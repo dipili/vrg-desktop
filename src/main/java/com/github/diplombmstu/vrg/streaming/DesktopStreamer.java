@@ -1,5 +1,6 @@
 package com.github.diplombmstu.vrg.streaming;
 
+import com.github.diplombmstu.vrg.common.ExceptionUtils;
 import org.jitsi.impl.neomedia.device.ScreenDeviceImpl;
 import org.jitsi.impl.neomedia.imgstreaming.DesktopInteractImpl;
 import org.jitsi.service.neomedia.device.ScreenDevice;
@@ -14,7 +15,6 @@ public class DesktopStreamer
 {
     private static final Logger LOGGER = Logger.getLogger(DesktopStreamer.class.getName());
 
-    private static final long OPEN_CAMERA_POLL_INTERVAL_MS = 1000L;
     private static DesktopInteractImpl desktopInteract;
     private final Object mLock = new Object();
     private final MovingAverage mAverageSpf = new MovingAverage(50);
@@ -24,6 +24,7 @@ public class DesktopStreamer
     private MJpegHttpStreamer mMJpegHttpStreamer = null;
     private long mNumFrames = 0L;
     private long mLastTimestamp = Long.MIN_VALUE;
+    private Thread frameLoopThread;
 
     public DesktopStreamer(final int port) throws AWTException
     {
@@ -34,8 +35,10 @@ public class DesktopStreamer
         mPort = port;
     }
 
-    public void start()
+    public void start() throws InterruptedException
     {
+        LOGGER.info("Starting desktop streamer...");
+
         synchronized (mLock)
         {
             if (mRunning)
@@ -45,18 +48,20 @@ public class DesktopStreamer
             mRunning = true;
         }
 
-        tryStartStreaming();
+        startJpegStreamer();
 
-        Thread thread = new Thread(() ->
-                                   {
-                                       //noinspection InfiniteLoopStatement
-                                       while (true)
-                                       {
-                                           sendNextFrame(new Date().getTime());
-                                       }
-                                   });
-        thread.setDaemon(true);
-        thread.start();
+        //noinspection InfiniteLoopStatement
+        frameLoopThread = new Thread(() ->
+                                     {
+                                         //noinspection InfiniteLoopStatement
+                                         while (true)
+                                         {
+                                             sendNextFrame(new Date().getTime());
+                                         }
+                                     });
+        frameLoopThread.start();
+
+        LOGGER.info("Desktop streaming has been successfully started.");
     }
 
     /**
@@ -64,8 +69,10 @@ public class DesktopStreamer
      * execution of stop() or shortly after it returns. stop() should
      * be called on the main thread.
      */
-    void stop()
+    public void stop()
     {
+        LOGGER.info("Stopping dekstop streamer...");
+
         synchronized (mLock)
         {
             if (!mRunning)
@@ -73,6 +80,7 @@ public class DesktopStreamer
                 throw new IllegalStateException("DesktopStreamer is already stopped");
             }
 
+            frameLoopThread.stop();
             mRunning = false;
             if (mMJpegHttpStreamer != null)
             {
@@ -81,34 +89,7 @@ public class DesktopStreamer
         }
     }
 
-    private void tryStartStreaming()
-    {
-        try
-        {
-            while (true)
-            {
-                try
-                {
-                    startStreamingIfRunning();
-                }
-                catch (final RuntimeException openCameraFailed)
-                {
-                    LOGGER.config("Open camera failed, retying in " + OPEN_CAMERA_POLL_INTERVAL_MS + "ms");
-                    Thread.sleep(OPEN_CAMERA_POLL_INTERVAL_MS);
-                    continue;
-                }
-                break;
-            }
-        }
-        catch (final Exception startPreviewFailed)
-        {
-            // Captures the IOException from startStreamingIfRunning and
-            // the InterruptException from Thread.sleep.
-            LOGGER.warning("Failed to start camera preview");
-        }
-    }
-
-    private void startStreamingIfRunning() throws IOException
+    private void startJpegStreamer() throws InterruptedException
     {
         ScreenDevice screenDevice = ScreenDeviceImpl.getDefaultScreenDevice();
 
@@ -146,21 +127,18 @@ public class DesktopStreamer
     {
         try
         {
-            ImageIO.write(desktopInteract.captureScreen(),
-                          "jpeg",
-                          mJpegOutputStream);
+            ImageIO.write(desktopInteract.captureScreen(), "jpeg", mJpegOutputStream);
         }
         catch (IOException e)
         {
-            e.printStackTrace(); // TODO
+            LOGGER.severe(ExceptionUtils.buildStackTrace(e));
         }
 
-        // Calculate the timestamp
         final long MILLI_PER_SECOND = 1000L;
         final long timestampSeconds = timestamp / MILLI_PER_SECOND;
 
-        // Update and log the frame rate
         final long LOGS_PER_FRAME = 10L;
+
         mNumFrames++;
         if (mLastTimestamp != Long.MIN_VALUE)
         {
