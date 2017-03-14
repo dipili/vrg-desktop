@@ -91,6 +91,9 @@ public class AVTransmit2
 
         for (MediaType mediaType : mediaTypes)
         {
+            if (mediaType.equals(MediaType.VIDEO))
+                continue;
+
             /*
              * The default MediaDevice (for a specific MediaType) is configured
              * (by the user of the application via some sort of UI) into the
