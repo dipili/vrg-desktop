@@ -19,7 +19,7 @@ public class RtpReceiver implements ControllerListener
     {
         try
         {
-            String media_url = "rtp://192.168.1.112:8664/audio";
+            String media_url = "rtp://:8664/audio";
             System.out.println("Receiver URL= " + media_url);
             MediaLocator media_locator = new MediaLocator(media_url);
             player = Manager.createPlayer(media_locator);
@@ -35,17 +35,24 @@ public class RtpReceiver implements ControllerListener
 
         try
         {
-            System.out.println("Trying to realize the player");
-            player.realize();
-            while (player.getState() != Controller.Realized)
-                Thread.sleep(100);
-
-            System.out.println("Player realized");
             player.start();
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
+    }
+
+    public void stop()
+    {
+        if (player == null)
+            return;
+
+        player.stop();
+        player.deallocate();
+        player.close();
+        player = null;
+
+        System.out.println("Player stopped");
     }
 }

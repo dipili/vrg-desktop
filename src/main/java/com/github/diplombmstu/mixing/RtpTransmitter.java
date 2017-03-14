@@ -116,7 +116,7 @@ public class RtpTransmitter
             // datasink our RTP datasink will multicast the audio
             try
             {
-                String url = "rtp://192.168.1.112:8664/audio";
+                String url = "rtp://127.0.0.1:8664/audio";
 
                 MediaLocator m = new MediaLocator(url);
 
