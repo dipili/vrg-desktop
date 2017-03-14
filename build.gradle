@@ -28,5 +28,4 @@ dependencies {
 
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.2.2'
     compile group: 'org.jitsi', name: 'jitsi-libjitsi', version: '2.9-SNAPSHOT'
-    compile fileTree(dir: 'lib', include: '*.jar')
 }
