@@ -19,7 +19,7 @@ public class RtpReceiver implements ControllerListener
     {
         try
         {
-            String media_url = "rtp://:8664/audio";
+            String media_url = "rtsp://:8554/audio";
             System.out.println("Receiver URL= " + media_url);
             MediaLocator media_locator = new MediaLocator(media_url);
             player = Manager.createPlayer(media_locator);

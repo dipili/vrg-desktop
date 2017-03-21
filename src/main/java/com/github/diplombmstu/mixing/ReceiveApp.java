@@ -10,7 +10,7 @@ import org.jitsi.service.neomedia.format.MediaFormat;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 
-public class ReceiveApplication extends Application
+public class ReceiveApp extends Application
 {
     public static void main(String[] args)
     {
