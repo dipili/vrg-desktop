@@ -18,13 +18,6 @@ public class ServletCommunicationEndpoint extends PerfectWebSocketAdapter
 {
     static final EventBus EVENT_BUS = new EventBus();
 
-    @OnClose
-    @Override
-    public void onWebSocketClose(CloseReason reason)
-    {
-        EVENT_BUS.post(new WebSocketCloseEvent(reason));
-    }
-
     @OnError
     @Override
     public void onWebSocketError(Throwable cause)
@@ -44,5 +37,12 @@ public class ServletCommunicationEndpoint extends PerfectWebSocketAdapter
     public void onWebSocketConnect(Session session)
     {
         EVENT_BUS.post(new WebSocketConnectEvent(session));
+    }
+
+    @OnClose
+    @Override
+    public void onWebSocketClose(CloseReason reason)
+    {
+        EVENT_BUS.post(new WebSocketCloseEvent(reason));
     }
 }

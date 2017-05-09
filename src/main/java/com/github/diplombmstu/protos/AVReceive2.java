@@ -22,19 +22,57 @@ import java.util.Map;
 public class AVReceive2
 {
     /**
+     * The name of the command-line argument which specifies the port on which
+     * the media is to be received. The command-line argument value will be used
+     * as the port to receive the audio RTP on, the next port after it will be
+     * used to receive the audio RTCP on. Respectively, the subsequent ports
+     * ports will be used to transmit the video RTP and RTCP on."
+     */
+    private static final String LOCAL_PORT_BASE_ARG_NAME = "--local-port-base=";
+    /**
+     * The name of the command-line argument which specifies the name of the
+     * host from which the media is to be received.
+     */
+    private static final String REMOTE_HOST_ARG_NAME = "--remote-host=";
+    /**
+     * The name of the command-line argument which specifies the port from which
+     * the media is to be received. The command-line argument value will be
+     * used as the port to receive the audio RTP from, the next port after it
+     * will be to receive the audio RTCP from. Respectively, the subsequent
+     * ports will be used to receive the video RTP and RTCP from."
+     */
+    private static final String REMOTE_PORT_BASE_ARG_NAME = "--remote-port-base=";
+    /**
+     * The list of command-line arguments accepted as valid by the
+     * <tt>AVReceive2</tt> application along with their human-readable usage
+     * descriptions.
+     */
+    private static final String[][] ARGS = {{LOCAL_PORT_BASE_ARG_NAME,
+                                             "The port on which media is to be received. The specified value" +
+                                             " will be used as the port to receive the audio RTP on," +
+                                             " the next port after it will be used to receive the" +
+                                             " audio RTCP on. Respectively, the subsequent ports will" +
+                                             " be used to receive the video RTP and RTCP on."},
+                                            {REMOTE_HOST_ARG_NAME,
+                                             "The name of the host from which the media is to be received."},
+                                            {REMOTE_PORT_BASE_ARG_NAME,
+                                             "The port from which media is to be received. The specified" +
+                                             " vaue will be used as the port to receive the audio RTP" +
+                                             " from, the next port after it will be used to receive" +
+                                             " the audio RTCP from. Respectively, the subsequent ports" +
+                                             " will be used to receive the video RTP and RTCP from."}};
+    /**
      * The port which is the target of the transmission i.e. on which the media
      * is to be received.
      *
      * @see #LOCAL_PORT_BASE_ARG_NAME
      */
     private int localPortBase;
-
     /**
      * The <tt>MediaStream</tt> instances initialized by this instance indexed
      * by their respective <tt>MediaType</tt> ordinal.
      */
     private MediaStream[] mediaStreams;
-
     /**
      * The <tt>InetAddress</tt> of the host which is the target of the receipt
      * i.e. from which the media is to be received.
@@ -42,7 +80,6 @@ public class AVReceive2
      * @see #REMOTE_HOST_ARG_NAME
      */
     private InetAddress remoteAddr;
-
     /**
      * The port which is the target of the receipt i.e. from which the media is
      * to be received.
@@ -68,6 +105,66 @@ public class AVReceive2
         this.localPortBase = (localPortBase == null) ? -1 : Integer.parseInt(localPortBase);
         this.remoteAddr = InetAddress.getByName(remoteHost);
         this.remotePortBase = Integer.parseInt(remotePortBase);
+    }
+
+    public static void main(String[] args) throws Exception
+    {
+        // We need three parameters to do the transmission. For example,
+        // ant run-example -Drun.example.name=AVReceive2 -Drun.example.arg.line="--local-port-base=10000 --remote-host=129.130.131.132 --remote-port-base=5000"
+        if (args.length < 3)
+        {
+            prUsage();
+        }
+        else
+        {
+            Map<String, String> argMap = AVTransmit2.parseCommandLineArgs(args);
+
+            LibJitsi.start();
+            try
+            {
+                AVReceive2 avReceive = new AVReceive2(argMap.get(LOCAL_PORT_BASE_ARG_NAME),
+                                                      argMap.get(REMOTE_HOST_ARG_NAME),
+                                                      argMap.get(REMOTE_PORT_BASE_ARG_NAME));
+
+                if (avReceive.initialize())
+                {
+                    try
+                    {
+                        /*
+                         * Wait for the media to be received and played back.
+                         * AVTransmit2 transmits for 1 minute so AVReceive2
+                         * waits for 2 minutes to allow AVTransmit2 to start the
+                         * tranmission with a bit of a delay (if necessary).
+                         */
+                        long then = System.currentTimeMillis();
+                        long waitingPeriod = 2 * 60000;
+
+                        try
+                        {
+                            while ((System.currentTimeMillis() - then) < waitingPeriod)
+                                Thread.sleep(1000);
+                        }
+                        catch (InterruptedException ie)
+                        {
+                        }
+                    }
+                    finally
+                    {
+                        avReceive.close();
+                    }
+
+                    System.err.println("Exiting AVReceive2");
+                }
+                else
+                {
+                    System.err.println("Failed to initialize the sessions.");
+                }
+            }
+            finally
+            {
+                LibJitsi.stop();
+            }
+        }
     }
 
     /**
@@ -245,110 +342,6 @@ public class AVReceive2
             }
 
             mediaStreams = null;
-        }
-    }
-
-    /**
-     * The name of the command-line argument which specifies the port on which
-     * the media is to be received. The command-line argument value will be used
-     * as the port to receive the audio RTP on, the next port after it will be
-     * used to receive the audio RTCP on. Respectively, the subsequent ports
-     * ports will be used to transmit the video RTP and RTCP on."
-     */
-    private static final String LOCAL_PORT_BASE_ARG_NAME = "--local-port-base=";
-
-    /**
-     * The name of the command-line argument which specifies the name of the
-     * host from which the media is to be received.
-     */
-    private static final String REMOTE_HOST_ARG_NAME = "--remote-host=";
-
-    /**
-     * The name of the command-line argument which specifies the port from which
-     * the media is to be received. The command-line argument value will be
-     * used as the port to receive the audio RTP from, the next port after it
-     * will be to receive the audio RTCP from. Respectively, the subsequent
-     * ports will be used to receive the video RTP and RTCP from."
-     */
-    private static final String REMOTE_PORT_BASE_ARG_NAME = "--remote-port-base=";
-
-    /**
-     * The list of command-line arguments accepted as valid by the
-     * <tt>AVReceive2</tt> application along with their human-readable usage
-     * descriptions.
-     */
-    private static final String[][] ARGS = {{LOCAL_PORT_BASE_ARG_NAME,
-                                             "The port on which media is to be received. The specified value" +
-                                             " will be used as the port to receive the audio RTP on," +
-                                             " the next port after it will be used to receive the" +
-                                             " audio RTCP on. Respectively, the subsequent ports will" +
-                                             " be used to receive the video RTP and RTCP on."},
-                                            {REMOTE_HOST_ARG_NAME,
-                                             "The name of the host from which the media is to be received."},
-                                            {REMOTE_PORT_BASE_ARG_NAME,
-                                             "The port from which media is to be received. The specified" +
-                                             " vaue will be used as the port to receive the audio RTP" +
-                                             " from, the next port after it will be used to receive" +
-                                             " the audio RTCP from. Respectively, the subsequent ports" +
-                                             " will be used to receive the video RTP and RTCP from."}};
-
-    public static void main(String[] args) throws Exception
-    {
-        // We need three parameters to do the transmission. For example,
-        // ant run-example -Drun.example.name=AVReceive2 -Drun.example.arg.line="--local-port-base=10000 --remote-host=129.130.131.132 --remote-port-base=5000"
-        if (args.length < 3)
-        {
-            prUsage();
-        }
-        else
-        {
-            Map<String, String> argMap = AVTransmit2.parseCommandLineArgs(args);
-
-            LibJitsi.start();
-            try
-            {
-                AVReceive2 avReceive = new AVReceive2(argMap.get(LOCAL_PORT_BASE_ARG_NAME),
-                                                      argMap.get(REMOTE_HOST_ARG_NAME),
-                                                      argMap.get(REMOTE_PORT_BASE_ARG_NAME));
-
-                if (avReceive.initialize())
-                {
-                    try
-                    {
-                        /*
-                         * Wait for the media to be received and played back.
-                         * AVTransmit2 transmits for 1 minute so AVReceive2
-                         * waits for 2 minutes to allow AVTransmit2 to start the
-                         * tranmission with a bit of a delay (if necessary).
-                         */
-                        long then = System.currentTimeMillis();
-                        long waitingPeriod = 2 * 60000;
-
-                        try
-                        {
-                            while ((System.currentTimeMillis() - then) < waitingPeriod)
-                                Thread.sleep(1000);
-                        }
-                        catch (InterruptedException ie)
-                        {
-                        }
-                    }
-                    finally
-                    {
-                        avReceive.close();
-                    }
-
-                    System.err.println("Exiting AVReceive2");
-                }
-                else
-                {
-                    System.err.println("Failed to initialize the sessions.");
-                }
-            }
-            finally
-            {
-                LibJitsi.stop();
-            }
         }
     }
 

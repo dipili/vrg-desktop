@@ -1,4 +1,4 @@
-package com.github.diplombmstu.converter3d;
+package com.github.diplombmstu.converter;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -28,8 +28,6 @@ public class Utils
 
     static BufferedImage createSameSizeImage(BufferedImage inputImage)
     {
-        return new BufferedImage(inputImage.getWidth(),
-                                 inputImage.getHeight(),
-                                 BufferedImage.TYPE_INT_ARGB);
+        return new BufferedImage(inputImage.getWidth(), inputImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
     }
 }

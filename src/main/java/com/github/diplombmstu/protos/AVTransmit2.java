@@ -23,19 +23,61 @@ import java.util.Map;
 public class AVTransmit2
 {
     /**
+     * The name of the command-line argument which specifies the port from which
+     * the media is to be transmitted. The command-line argument value will be
+     * used as the port to transmit the audio RTP from, the next port after it
+     * will be to transmit the audio RTCP from. Respectively, the subsequent
+     * ports will be used to transmit the video RTP and RTCP from."
+     */
+    private static final String LOCAL_PORT_BASE_ARG_NAME = "--local-port-base=";
+    /**
+     * The name of the command-line argument which specifies the name of the
+     * host to which the media is to be transmitted.
+     */
+    private static final String REMOTE_HOST_ARG_NAME = "--remote-host=";
+    /**
+     * The name of the command-line argument which specifies the port to which
+     * the media is to be transmitted. The command-line argument value will be
+     * used as the port to transmit the audio RTP to, the next port after it
+     * will be to transmit the audio RTCP to. Respectively, the subsequent ports
+     * will be used to transmit the video RTP and RTCP to."
+     */
+    private static final String REMOTE_PORT_BASE_ARG_NAME = "--remote-port-base=";
+    /**
+     * The list of command-line arguments accepted as valid by the
+     * <tt>AVTransmit2</tt> application along with their human-readable usage
+     * descriptions.
+     */
+    private static final String[][] ARGS = {{LOCAL_PORT_BASE_ARG_NAME,
+                                             "The port which is the source of the transmission i.e. from" +
+                                             " which the media is to be transmitted. The specified" +
+                                             " value will be used as the port to transmit the audio" +
+                                             " RTP from, the next port after it will be used to" +
+                                             " transmit the audio RTCP from. Respectively, the" +
+                                             " subsequent ports will be used to transmit the video RTP" +
+                                             " and RTCP from."},
+                                            {REMOTE_HOST_ARG_NAME,
+                                             "The name of the host which is the target of the transmission" +
+                                             " i.e. to which the media is to be transmitted"},
+                                            {REMOTE_PORT_BASE_ARG_NAME,
+                                             "The port which is the target of the transmission i.e. to which" +
+                                             " the media is to be transmitted. The specified value" +
+                                             " will be used as the port to transmit the audio RTP to" +
+                                             " the next port after it will be used to transmit the" +
+                                             " audio RTCP to. Respectively, the subsequent ports will" +
+                                             " be used to transmit the video RTP and RTCP to."}};
+    /**
      * The port which is the source of the transmission i.e. from which the
      * media is to be transmitted.
      *
      * @see #LOCAL_PORT_BASE_ARG_NAME
      */
     private int localPortBase;
-
     /**
      * The <tt>MediaStream</tt> instances initialized by this instance indexed
      * by their respective <tt>MediaType</tt> ordinal.
      */
     private MediaStream[] mediaStreams;
-
     /**
      * The <tt>InetAddress</tt> of the host which is the target of the
      * transmission i.e. to which the media is to be transmitted.
@@ -43,7 +85,6 @@ public class AVTransmit2
      * @see #REMOTE_HOST_ARG_NAME
      */
     private InetAddress remoteAddr;
-
     /**
      * The port which is the target of the transmission i.e. to which the media
      * is to be transmitted.
@@ -70,6 +111,96 @@ public class AVTransmit2
         this.localPortBase = (localPortBase == null) ? -1 : Integer.parseInt(localPortBase);
         this.remoteAddr = InetAddress.getByName(remoteHost);
         this.remotePortBase = Integer.parseInt(remotePortBase);
+    }
+
+    public static void main(String[] args) throws Exception
+    {
+        // We need two parameters to do the transmission. For example,
+        // ant run-example -Drun.example.name=AVTransmit2 -Drun.example.arg.line="--remote-host=127.0.0.1 --remote-port-base=10000"
+        if (args.length < 2)
+        {
+            prUsage();
+        }
+        else
+        {
+            Map<String, String> argMap = parseCommandLineArgs(args);
+
+            LibJitsi.start();
+            try
+            {
+                // Create a audio transmit object with the specified params.
+                AVTransmit2 at = new AVTransmit2(argMap.get(LOCAL_PORT_BASE_ARG_NAME),
+                                                 argMap.get(REMOTE_HOST_ARG_NAME),
+                                                 argMap.get(REMOTE_PORT_BASE_ARG_NAME));
+                // Start the transmission
+                String result = at.start();
+
+                // result will be non-null if there was an error. The return
+                // value is a String describing the possible error. Print it.
+                if (result == null)
+                {
+                    System.err.println("Start transmission for 60 seconds...");
+
+                    // Transmit for 60 seconds and then close the processor
+                    // This is a safeguard when using a capture data source
+                    // so that the capture device will be properly released
+                    // before quitting.
+                    // The right thing to do would be to have a GUI with a
+                    // "Stop" button that would call stop on AVTransmit2
+                    for (; ; )
+                    {
+                    }
+
+                    // Stop the transmission
+//                    at.stop();
+//
+//                    System.err.println("...transmission ended.");
+                }
+                else
+                {
+                    System.err.println("Error : " + result);
+                }
+            }
+            finally
+            {
+                LibJitsi.stop();
+            }
+        }
+    }
+
+    /**
+     * Parses the arguments specified to the <tt>AVTransmit2</tt> application on
+     * the command line.
+     *
+     * @param args the arguments specified to the <tt>AVTransmit2</tt>
+     *             application on the command line
+     * @return a <tt>Map</tt> containing the arguments specified to the
+     * <tt>AVTransmit2</tt> application on the command line in the form of
+     * name-value associations
+     */
+    static Map<String, String> parseCommandLineArgs(String[] args)
+    {
+        Map<String, String> argMap = new HashMap<String, String>();
+
+        for (String arg : args)
+        {
+            int keyEndIndex = arg.indexOf('=');
+            String key;
+            String value;
+
+            if (keyEndIndex == -1)
+            {
+                key = arg;
+                value = null;
+            }
+            else
+            {
+                key = arg.substring(0, keyEndIndex + 1);
+                value = arg.substring(keyEndIndex + 1);
+            }
+            argMap.put(key, value);
+        }
+        return argMap;
     }
 
     /**
@@ -244,144 +375,6 @@ public class AVTransmit2
 
             mediaStreams = null;
         }
-    }
-
-    /**
-     * The name of the command-line argument which specifies the port from which
-     * the media is to be transmitted. The command-line argument value will be
-     * used as the port to transmit the audio RTP from, the next port after it
-     * will be to transmit the audio RTCP from. Respectively, the subsequent
-     * ports will be used to transmit the video RTP and RTCP from."
-     */
-    private static final String LOCAL_PORT_BASE_ARG_NAME = "--local-port-base=";
-
-    /**
-     * The name of the command-line argument which specifies the name of the
-     * host to which the media is to be transmitted.
-     */
-    private static final String REMOTE_HOST_ARG_NAME = "--remote-host=";
-
-    /**
-     * The name of the command-line argument which specifies the port to which
-     * the media is to be transmitted. The command-line argument value will be
-     * used as the port to transmit the audio RTP to, the next port after it
-     * will be to transmit the audio RTCP to. Respectively, the subsequent ports
-     * will be used to transmit the video RTP and RTCP to."
-     */
-    private static final String REMOTE_PORT_BASE_ARG_NAME = "--remote-port-base=";
-
-    /**
-     * The list of command-line arguments accepted as valid by the
-     * <tt>AVTransmit2</tt> application along with their human-readable usage
-     * descriptions.
-     */
-    private static final String[][] ARGS = {{LOCAL_PORT_BASE_ARG_NAME,
-                                             "The port which is the source of the transmission i.e. from" +
-                                             " which the media is to be transmitted. The specified" +
-                                             " value will be used as the port to transmit the audio" +
-                                             " RTP from, the next port after it will be used to" +
-                                             " transmit the audio RTCP from. Respectively, the" +
-                                             " subsequent ports will be used to transmit the video RTP" +
-                                             " and RTCP from."},
-                                            {REMOTE_HOST_ARG_NAME,
-                                             "The name of the host which is the target of the transmission" +
-                                             " i.e. to which the media is to be transmitted"},
-                                            {REMOTE_PORT_BASE_ARG_NAME,
-                                             "The port which is the target of the transmission i.e. to which" +
-                                             " the media is to be transmitted. The specified value" +
-                                             " will be used as the port to transmit the audio RTP to" +
-                                             " the next port after it will be used to transmit the" +
-                                             " audio RTCP to. Respectively, the subsequent ports will" +
-                                             " be used to transmit the video RTP and RTCP to."}};
-
-    public static void main(String[] args) throws Exception
-    {
-        // We need two parameters to do the transmission. For example,
-        // ant run-example -Drun.example.name=AVTransmit2 -Drun.example.arg.line="--remote-host=127.0.0.1 --remote-port-base=10000"
-        if (args.length < 2)
-        {
-            prUsage();
-        }
-        else
-        {
-            Map<String, String> argMap = parseCommandLineArgs(args);
-
-            LibJitsi.start();
-            try
-            {
-                // Create a audio transmit object with the specified params.
-                AVTransmit2 at = new AVTransmit2(argMap.get(LOCAL_PORT_BASE_ARG_NAME),
-                                                 argMap.get(REMOTE_HOST_ARG_NAME),
-                                                 argMap.get(REMOTE_PORT_BASE_ARG_NAME));
-                // Start the transmission
-                String result = at.start();
-
-                // result will be non-null if there was an error. The return
-                // value is a String describing the possible error. Print it.
-                if (result == null)
-                {
-                    System.err.println("Start transmission for 60 seconds...");
-
-                    // Transmit for 60 seconds and then close the processor
-                    // This is a safeguard when using a capture data source
-                    // so that the capture device will be properly released
-                    // before quitting.
-                    // The right thing to do would be to have a GUI with a
-                    // "Stop" button that would call stop on AVTransmit2
-                    for (; ; )
-                    {
-                    }
-
-                    // Stop the transmission
-//                    at.stop();
-//
-//                    System.err.println("...transmission ended.");
-                }
-                else
-                {
-                    System.err.println("Error : " + result);
-                }
-            }
-            finally
-            {
-                LibJitsi.stop();
-            }
-        }
-    }
-
-    /**
-     * Parses the arguments specified to the <tt>AVTransmit2</tt> application on
-     * the command line.
-     *
-     * @param args the arguments specified to the <tt>AVTransmit2</tt>
-     *             application on the command line
-     * @return a <tt>Map</tt> containing the arguments specified to the
-     * <tt>AVTransmit2</tt> application on the command line in the form of
-     * name-value associations
-     */
-    static Map<String, String> parseCommandLineArgs(String[] args)
-    {
-        Map<String, String> argMap = new HashMap<String, String>();
-
-        for (String arg : args)
-        {
-            int keyEndIndex = arg.indexOf('=');
-            String key;
-            String value;
-
-            if (keyEndIndex == -1)
-            {
-                key = arg;
-                value = null;
-            }
-            else
-            {
-                key = arg.substring(0, keyEndIndex + 1);
-                value = arg.substring(keyEndIndex + 1);
-            }
-            argMap.put(key, value);
-        }
-        return argMap;
     }
 
     /**

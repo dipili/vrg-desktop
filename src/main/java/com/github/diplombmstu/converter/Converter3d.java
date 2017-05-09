@@ -1,4 +1,4 @@
-package com.github.diplombmstu.converter3d;
+package com.github.diplombmstu.converter;
 
 import javafx.util.Pair;
 
@@ -15,11 +15,18 @@ import java.util.stream.Collectors;
  */
 public class Converter3d
 {
-    private static final double b = 6.8;
-    private static final double Wsm = 50;
-    private static final double Wpx = 1920;
+    private double b = 6.8;
+    private double wsm = 50;
+    private double wpx = 1920;
 
-    public void convert(Path input, Path depthMap, Path leftEye, Path rightEye) throws Exception
+    public Converter3d(double b, double wsm, double wpx)
+    {
+        this.b = b;
+        this.wsm = wsm;
+        this.wpx = wpx;
+    }
+
+    public void convert(Path input, Path depthMap, Path output) throws Exception
     {
         BufferedImage inputImage = Utils.readImage(input);
         BufferedImage depthMapImage = Utils.readImage(depthMap);
@@ -45,8 +52,35 @@ public class Converter3d
                 shift(inputImage, depthMapImage, leftImage, rightImage, coordinates);
         }
 
-        ImageIO.write(leftImage, "png", leftEye.toFile());
-        ImageIO.write(rightImage, "png", rightEye.toFile());
+        int outputImageWidth = leftImage.getWidth();
+        int outputImageHeight = leftImage.getHeight() * 2;
+        BufferedImage outputImage = new BufferedImage(outputImageWidth, outputImageHeight, BufferedImage.TYPE_INT_ARGB);
+
+        insertImageIntoImage(leftImage,
+                             outputImage,
+                             outputImageWidth / 2 - inputImage.getWidth() / 2,
+                             outputImageHeight - (outputImageHeight / 4 + inputImage.getHeight() / 2));
+
+        insertImageIntoImage(rightImage,
+                             outputImage,
+                             outputImageWidth / 2 - inputImage.getWidth() / 2,
+                             outputImageHeight - (outputImageHeight / 4 * 3 + inputImage.getHeight() / 2));
+
+        ImageIO.write(outputImage, "png", output.toFile());
+    }
+
+    private void insertImageIntoImage(BufferedImage source, BufferedImage target, int x, int y)
+    {
+        for (int i = 0; i < source.getWidth(); i++)
+        {
+            for (int j = 0; j < source.getHeight(); j++)
+            {
+                int targetX = x + i;
+                int targetY = y + j;
+
+                target.setRGB(targetX, targetY, source.getRGB(i, j));
+            }
+        }
     }
 
     private void shift(BufferedImage inputImage,
@@ -63,7 +97,7 @@ public class Converter3d
         double L = new Color(depthMapImage.getRGB(i, j)).getRed();
 
         double Psm = b * (1 - L / 127.5);
-        double Ppx = Wsm / Wpx / Psm;
+        double Ppx = wsm / wpx / Psm;
 
         int lx = (int) (i + Ppx / 2);
         int rx = (int) (i - Ppx / 2);

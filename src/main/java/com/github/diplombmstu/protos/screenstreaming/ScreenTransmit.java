@@ -23,7 +23,7 @@ public class ScreenTransmit
                        }
                    }).start();
 
-        for (;;)
+        for (; ; )
         {
         }
     }

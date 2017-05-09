@@ -92,13 +92,16 @@ public class VrgApplication extends Application
     {
         Path path = Paths.get(String.format("%s/.vrg/log", System.getProperty("user.home")));
 
-        try {
+        try
+        {
             if (!Files.exists(path))
             {
                 LOGGER.info("Application data directory doesn't exist. Creating folder tree...");
                 Files.createDirectories(path);
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             LOGGER.severe(String.format("Cannot create application data directories. %s", e));
         }
 

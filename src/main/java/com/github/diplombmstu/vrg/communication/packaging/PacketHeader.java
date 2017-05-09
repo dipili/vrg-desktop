@@ -1,7 +1,5 @@
 package com.github.diplombmstu.vrg.communication.packaging;
 
-import java.util.UUID;
-
 /**
  * TODO add comment
  */

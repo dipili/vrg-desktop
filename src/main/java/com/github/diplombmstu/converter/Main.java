@@ -18,12 +18,12 @@ public class Main extends Application
     @Override
     public void start(Stage primaryStage) throws IOException
     {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("MainWindow.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("ConverterForm.fxml"));
         Parent root = loader.load();
-        MainWindowController controller = loader.getController();
+        ConverterFormController controller = loader.getController();
         controller.setStage(primaryStage);
 
-        Scene scene = new Scene(root, 300, 275);
+        Scene scene = new Scene(root, 601, 466);
 
         primaryStage.setTitle("Image converter");
         primaryStage.setScene(scene);

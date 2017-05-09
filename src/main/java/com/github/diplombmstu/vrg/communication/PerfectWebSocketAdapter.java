@@ -11,5 +11,6 @@ import javax.websocket.Session;
 public abstract class PerfectWebSocketAdapter extends WebSocketAdapter
 {
     abstract public void onWebSocketConnect(Session session);
+
     abstract public void onWebSocketClose(CloseReason reason);
 }
