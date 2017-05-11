@@ -1,7 +1,10 @@
 package com.github.diplombmstu.vrg.communication.syncronization;
 
+import com.github.diplombmstu.vrg.common.VrgCommons;
+
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.TimerTask;
 
 /**
@@ -24,7 +27,7 @@ class SendMessageTask extends TimerTask
         try
         {
             byte[] buffer = message.getBytes();
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+            DatagramPacket packet = new DatagramPacket(buffer, buffer.length, InetAddress.getByName("192.168.0.106"), VrgCommons.SYNC_PORT);
             socket.send(packet);
         }
         catch (Exception e)

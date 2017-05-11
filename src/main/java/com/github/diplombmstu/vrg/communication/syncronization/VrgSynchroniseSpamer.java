@@ -2,10 +2,8 @@ package com.github.diplombmstu.vrg.communication.syncronization;
 
 import com.github.diplombmstu.vrg.common.VrgCommons;
 
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.io.IOException;
+import java.net.*;
 import java.util.Timer;
 
 /**
@@ -17,7 +15,7 @@ public class VrgSynchroniseSpamer
     private DatagramSocket socket;
     private Timer timer;
 
-    public void start(int port) throws UnknownHostException, SocketException
+    public void start(int port) throws IOException
     {
         socket = createSocket(port);
         timer = new Timer();
@@ -32,9 +30,9 @@ public class VrgSynchroniseSpamer
         timer.cancel();
     }
 
-    private DatagramSocket createSocket(int port) throws SocketException, UnknownHostException
+    private DatagramSocket createSocket(int port) throws IOException
     {
-        DatagramSocket socket = new DatagramSocket(port, InetAddress.getByName("255.255.255.255"));
+        DatagramSocket socket = new DatagramSocket();
         socket.setBroadcast(true);
 
         return socket;
